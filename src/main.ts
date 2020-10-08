@@ -141,12 +141,12 @@ async function openPR(
     title: prTitle,
     body: prBody,
     head: branch,
-    base: 'master'
+    base: 'master',
   })
 
   octokit.issues.addLabels({
     ...repo,
-    issue_number: pr.data.id,
+    issue_number: pr.data.number,
     labels: prLabels
   })
 }

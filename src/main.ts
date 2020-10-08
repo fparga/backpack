@@ -1,16 +1,21 @@
 import {JSDOM} from 'jsdom'
 import * as core from '@actions/core'
-import github from '@actions/github'
+import {context, getOctokit} from '@actions/github'
 import readability, {ParseResult} from '@mozilla/readability'
 import sanitize from 'sanitize-filename'
 import TurndownService from 'turndown'
 
 const turndownService = new TurndownService()
 
+process.on('unhandledRejection', handleError)
+// eslint-disable-next-line github/no-then
+run().catch(handleError)
+
 async function run(): Promise<void> {
   try {
-    const url = core.getInput('url')
-    const token = core.getInput('github-token')
+    const url = core.getInput('url', {required: true})
+    const token = core.getInput('github-token', {required: true})
+    const octokit = getOctokit(token)
 
     core.info('Retrieving DOM from url...')
     const dom = await JSDOM.fromURL(url)
@@ -25,7 +30,7 @@ async function run(): Promise<void> {
 
     const sanitizedTitle = sanitize(markdownTitle)
 
-    await openPR(token, {
+    await openPR(octokit, {
       path: `${sanitizedTitle}.md`,
       content: createArticle({
         title: markdownTitle,
@@ -46,8 +51,6 @@ async function run(): Promise<void> {
   }
 }
 
-run()
-
 function toBase64(s: string): string {
   return Buffer.from(s).toString('base64')
 }
@@ -59,7 +62,7 @@ function extractArticle(document: Document): ParseResult {
   const parseResult = reader.parse()
 
   core.startGroup('Article content:')
-  core.debug(parseResult.content)
+  core.info(parseResult.content)
   core.endGroup()
 
   return parseResult
@@ -69,7 +72,7 @@ function htmlToMarkdown(html: string): string {
   const markdown = turndownService.turndown(html)
 
   core.startGroup('Markdown:')
-  core.debug(markdown)
+  core.info(markdown)
   core.endGroup()
 
   return markdown
@@ -95,7 +98,7 @@ ${content}
 }
 
 async function openPR(
-  token: string,
+  octokit: ReturnType<typeof getOctokit>,
   {
     content,
     path,
@@ -114,8 +117,7 @@ async function openPR(
     prLabels: string[]
   }
 ): Promise<void> {
-  const octokit = github.getOctokit(token)
-  const {repo, sha} = github.context
+  const {repo, sha} = context
 
   core.info(`Creating branch 'refs/heads/${branch}'...`)
   await octokit.git.createRef({
@@ -147,4 +149,11 @@ async function openPR(
     issue_number: pr.data.id,
     labels: prLabels
   })
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function handleError(err: any): void {
+  // eslint-disable-next-line no-console
+  console.error(err)
+  core.setFailed(`Unhandled error: ${err}`)
 }

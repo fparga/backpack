@@ -37,7 +37,7 @@ async function run(): Promise<void> {
         content: markdownContent,
         url
       }),
-      branch: `article/${sanitizedTitle}`,
+      branch: `article/${sanitizedTitle.replace(/ /gi, '-')}`,
       commitMsg: `article: ${markdownTitle}`,
       prTitle: markdownTitle,
       // TODO: better body

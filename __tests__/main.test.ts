@@ -1,27 +1,23 @@
-import {wait} from '../src/wait'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
+import readability from '@mozilla/readability'
+import {JSDOM} from 'jsdom'
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
-})
+test('test readability', () => {
+  var doc = new JSDOM("<body>Here's a bunch of text</body>", {
+    url: 'https://www.example.com/the-page-i-got-the-source-from'
+  })
 
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
-})
+  // @ts-ignore
+  let reader = new readability.Readability(doc.window.document)
+  let article = reader.parse()
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execSync(`node ${ip}`, options).toString())
+  expect(article).toStrictEqual({
+    title: '',
+    byline: null,
+    dir: null,
+    content: `<div id="readability-page-1" class="page">Here's a bunch of text</div>`,
+    textContent: "Here's a bunch of text",
+    length: 22,
+    excerpt: undefined,
+    siteName: null
+  })
 })

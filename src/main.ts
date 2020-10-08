@@ -26,9 +26,9 @@ async function run(): Promise<void> {
     core.info('Converting Article to Markdown...')
     const markdownContent = htmlToMarkdown(content)
     const markdownExcerpt = htmlToMarkdown(excerpt)
-    const markdownTitle = htmlToMarkdown(title)
+    const markdownTitle = htmlToMarkdown(title).replace(/\.$/, '')
 
-    const sanitizedTitle = sanitize(markdownTitle)
+    const sanitizedTitle = sanitize(markdownTitle).toLowerCase()
 
     await openPR(octokit, {
       path: `${sanitizedTitle}.md`,
@@ -40,7 +40,6 @@ async function run(): Promise<void> {
       branch: `article/${sanitizedTitle.replace(/ /gi, '-')}`,
       commitMsg: `article: ${markdownTitle}`,
       prTitle: markdownTitle,
-      // TODO: better body
       prBody: markdownExcerpt,
       prLabels: ['article']
     })
@@ -141,7 +140,7 @@ async function openPR(
     title: prTitle,
     body: prBody,
     head: branch,
-    base: 'master',
+    base: 'master'
   })
 
   octokit.issues.addLabels({

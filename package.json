@@ -30,7 +30,7 @@
     "@mozilla/readability": "^0.3.0",
     "jsdom": "^16.4.0",
     "sanitize-filename": "^1.6.3",
-    "turndown": "^6.0.0"
+    "turndown": "^7.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",

@@ -27,7 +27,7 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
-    "@mozilla/readability": "^0.3.0",
+    "@mozilla/readability": "^0.4.1",
     "jsdom": "^16.4.0",
     "sanitize-filename": "^1.6.3",
     "turndown": "^7.0.0"

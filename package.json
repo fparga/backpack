@@ -33,7 +33,7 @@
     "turndown": "^7.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.19",
+    "@types/jest": "^27.4.1",
     "@types/jsdom": "^16.2.10",
     "@types/mozilla-readability": "^0.2.0",
     "@types/node": "^14.14.20",
